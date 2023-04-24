@@ -1,0 +1,92 @@
+# This is a basic workflow to help you get started with Actions
+
+import pygame
+import random
+
+pygame.init()
+
+# Set the window size
+screen_width = 800
+screen_height = 600
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption("Health Hero")
+
+# Load the images and sounds
+bg_image = pygame.image.load("background.png").convert()
+object_image = pygame.image.load("object.png").convert_alpha()
+provider_image = pygame.image.load("provider.png").convert_alpha()
+syrup_image = pygame.image.load("syrup.png").convert_alpha()
+honey_image = pygame.image.load("honey.png").convert_alpha()
+cough_sound = pygame.mixer.Sound("cough.wav")
+success_sound = pygame.mixer.Sound("success.wav")
+failure_sound = pygame.mixer.Sound("failure.wav")
+
+# Set the object's initial position
+object_x = random.randint(50, screen_width - 50)
+object_y = random.randint(50, screen_height - 50)
+
+# Set the provider's initial position
+provider_x = screen_width // 2
+provider_y = screen_height - 100
+
+# Set the treatment mode variables
+treatment_mode = False
+treatment_text = ""
+treatment_image = None
+treatment_sound = None
+
+# Set the game loop variables
+game_running = True
+game_success = False
+
+# The game loop
+while game_running:
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            game_running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            # Check if the provider is near the object
+            if abs(provider_x - object_x) < 50 and abs(provider_y - object_y) < 50:
+                treatment_mode = True
+                # Set the treatment mode variables based on the object's symptoms
+                if random.random() < 0.5:
+                    treatment_text = "Cough"
+                    treatment_image = syrup_image
+                    treatment_sound = cough_sound
+                else:
+                    treatment_text = "Fever"
+                    treatment_image = honey_image
+                    treatment_sound = None
+
+    # Move the provider based on the arrow keys
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] and provider_x > 0:
+        provider_x -= 5
+    elif keys[pygame.K_RIGHT] and provider_x < screen_width - 50:
+        provider_x += 5
+    elif keys[pygame.K_UP] and provider_y > 0:
+        provider_y -= 5
+    elif keys[pygame.K_DOWN] and provider_y < screen_height - 50:
+        provider_y += 5
+
+    # Draw the background and objects
+    screen.blit(bg_image, (0, 0))
+    screen.blit(object_image, (object_x, object_y))
+    screen.blit(provider_image, (provider_x, provider_y))
+
+    # Draw the treatment mode interface
+    if treatment_mode:
+        pygame.draw.rect(screen, (255, 255, 255), (50, 50, screen_width - 100, screen_height - 100))
+        font = pygame.font.Font(None, 50)
+        text = font.render("Treatment mode: " + treatment_text, True, (0, 0, 0))
+        screen.blit(text, (100, 100))
+        if treatment_image:
+            screen.blit(treatment_image, (screen_width // 2, screen_height // 2))
+        if treatment_sound:
+            treatment_sound.play()
+
+    # Check if the game is over
+    if game_success or pygame.time.get_ticks() > 10000:
+        game_running
+
