@@ -88,5 +88,6 @@ while game_running:
 
     # Check if the game is over
     if game_success or pygame.time.get_ticks() > 10000:
-        game_running
+       game_running = False
+
 
